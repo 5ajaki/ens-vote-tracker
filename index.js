@@ -246,21 +246,41 @@ async function checkRPCStatus(rpcUrl) {
 
 // Update the route handler to use this default
 app.get("/", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 50;
-
   try {
     const proposalId = validateProposalId(
       req.query.proposal || DEFAULT_PROPOSAL_ID
     );
     const rpcUrl = req.query.rpc || config.RPC_URL;
     const rpcStatus = await checkRPCStatus(rpcUrl);
+    const viewFilter = req.query.view || "all"; // new filter parameter
+    const sortBy = req.query.sort || "time"; // new sort parameter
+    const sortDir = req.query.dir || "desc"; // sort direction
 
     const votes = await getVotingData(proposalId);
     const stats = calculateVoteStats(votes);
-    const totalVotes = votes.length;
-    const totalPages = Math.ceil(totalVotes / perPage);
-    const paginatedVotes = votes.slice((page - 1) * perPage, page * perPage);
+
+    // Apply view filter
+    const filteredVotes = votes.filter((vote) => {
+      if (viewFilter === "all") return true;
+      if (viewFilter === "for" && vote.vote === "For") return true;
+      if (viewFilter === "against" && vote.vote === "Against") return true;
+      if (viewFilter === "abstain" && vote.vote === "Abstain") return true;
+      return false;
+    });
+
+    // Apply sorting
+    const sortedVotes = [...filteredVotes].sort((a, b) => {
+      if (sortBy === "weight") {
+        const weightA = parseFloat(a.weight);
+        const weightB = parseFloat(b.weight);
+        return sortDir === "desc" ? weightB - weightA : weightA - weightB;
+      } else {
+        // time
+        const timeA = new Date(a.timestamp);
+        const timeB = new Date(b.timestamp);
+        return sortDir === "desc" ? timeB - timeA : timeA - timeB;
+      }
+    });
 
     const html = `
       <!DOCTYPE html>
@@ -303,6 +323,32 @@ app.get("/", async (req, res) => {
                   color: #666;
                   font-style: italic;
               }
+              .view-buttons {
+                  margin: 20px 0;
+                  display: flex;
+                  gap: 10px;
+              }
+              .view-button {
+                  padding: 8px 16px;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  background: #f5f5f5;
+                  cursor: pointer;
+                  text-decoration: none;
+                  color: #333;
+              }
+              .view-button.active {
+                  background: #007bff;
+                  color: white;
+                  border-color: #0056b3;
+              }
+              .sort-header {
+                  cursor: pointer;
+                  text-decoration: underline;
+              }
+              .sort-header:hover {
+                  color: #007bff;
+              }
           </style>
       </head>
       <body>
@@ -342,26 +388,70 @@ app.get("/", async (req, res) => {
     ).toFixed(2)} weight)</p>
           </div>
 
-          <form id="proposalForm">
-              <input type="hidden" name="rpc" value="${rpcUrl}">
-              <label>Proposal ID: 
-                  <input type="text" name="proposal" value="${proposalId}">
-              </label>
-              <button type="submit">Load Proposal</button>
-          </form>
+          <div class="view-buttons">
+              <a href="?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=all&sort=${sortBy}&dir=${sortDir}" 
+                 class="view-button ${
+                   viewFilter === "all" ? "active" : ""
+                 }">All</a>
+              <a href="?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=for&sort=${sortBy}&dir=${sortDir}" 
+                 class="view-button ${
+                   viewFilter === "for" ? "active" : ""
+                 }">For</a>
+              <a href="?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=against&sort=${sortBy}&dir=${sortDir}" 
+                 class="view-button ${
+                   viewFilter === "against" ? "active" : ""
+                 }">Against</a>
+              <a href="?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=abstain&sort=${sortBy}&dir=${sortDir}" 
+                 class="view-button ${
+                   viewFilter === "abstain" ? "active" : ""
+                 }">Abstain</a>
+              <a href="#" class="view-button disabled" onclick="alert('Coming soon!')">Not Yet Voted</a>
+          </div>
 
           <table>
               <thead>
                   <tr>
                       <th>Voter</th>
                       <th>Vote</th>
-                      <th>Weight</th>
-                      <th>Time</th>
+                      <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=${viewFilter}&sort=weight&dir=${
+      sortBy === "weight" && sortDir === "asc" ? "desc" : "asc"
+    }'">
+                          Weight ${
+                            sortBy === "weight"
+                              ? sortDir === "asc"
+                                ? "↑"
+                                : "↓"
+                              : ""
+                          }
+                      </th>
+                      <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=${viewFilter}&sort=time&dir=${
+      sortBy === "time" && sortDir === "asc" ? "desc" : "asc"
+    }'">
+                          Time ${
+                            sortBy === "time"
+                              ? sortDir === "asc"
+                                ? "↑"
+                                : "↓"
+                              : ""
+                          }
+                      </th>
                       <th>Reason</th>
                   </tr>
               </thead>
               <tbody>
-                  ${paginatedVotes
+                  ${sortedVotes
                     .map(
                       (vote) => `
                       <tr>
@@ -377,22 +467,9 @@ app.get("/", async (req, res) => {
               </tbody>
           </table>
 
-          <div class="pagination">
-              ${
-                page > 1
-                  ? `<a href="?proposal=${proposalId}&page=${
-                      page - 1
-                    }&rpc=${encodeURIComponent(rpcUrl)}">Previous</a>`
-                  : ""
-              }
-              Page ${page} of ${totalPages}
-              ${
-                page < totalPages
-                  ? `<a href="?proposal=${proposalId}&page=${
-                      page + 1
-                    }&rpc=${encodeURIComponent(rpcUrl)}">Next</a>`
-                  : ""
-              }
+          <div class="refresh-note">
+              Last updated: ${new Date().toLocaleString()}
+              (Refresh page to update data)
           </div>
       </body>
       </html>
