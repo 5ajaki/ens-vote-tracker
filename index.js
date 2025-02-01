@@ -73,10 +73,11 @@ async function cacheData(proposalId, data) {
   );
 }
 
+// Add ENS resolution function
 async function resolveENSName(address, provider) {
   try {
     const ensName = await provider.lookupAddress(address);
-    return ensName || address;
+    return ensName ? `${ensName} (${address})` : address;
   } catch (error) {
     console.warn(`Failed to resolve ENS for ${address}:`, error.message);
     return address;
@@ -157,8 +158,14 @@ async function getVotingData(proposalId) {
           snapshotBlock
         );
 
+        // Add ENS resolution
+        const delegateWithENS = await resolveENSName(
+          parsed.args.voter,
+          provider
+        );
+
         return {
-          delegate: parsed.args.voter,
+          delegate: delegateWithENS,
           vote:
             parsed.args.support === 0n
               ? "Against"
