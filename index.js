@@ -36,12 +36,30 @@ const DEBUG_MODE = false; // Back to using cache
 // Add quorum constant at the top with other constants
 const QUORUM_VOTES = 1_000_000; // 1 million votes required for quorum
 
-// Add this helper function near the top with other utility functions
+// Update the number formatting function
 function formatNumber(number) {
+  const num = parseFloat(number);
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1)}K`;
+  }
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
-  }).format(number);
+  }).format(num);
+}
+
+// For stats, let's keep the full numbers but add K notation in parentheses for large values
+function formatStatNumber(number) {
+  const num = parseFloat(number);
+  const fullFormat = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(num);
+
+  if (num >= 1000) {
+    return `${fullFormat} (${(num / 1000).toFixed(1)}K)`;
+  }
+  return fullFormat;
 }
 
 async function ensureCacheDir() {
@@ -84,14 +102,16 @@ async function cacheData(proposalId, data) {
   );
 }
 
-// Add ENS resolution function
+// Update the resolveENSName function to include HTML formatting
 async function resolveENSName(address, provider) {
   try {
     const ensName = await provider.lookupAddress(address);
-    return ensName ? `${ensName} (${address})` : address;
+    return ensName
+      ? `<span class="ens-name">${ensName}</span> <span class="address">(${address})</span>`
+      : `<span class="address">${address}</span>`;
   } catch (error) {
     console.warn(`Failed to resolve ENS for ${address}:`, error.message);
-    return address;
+    return `<span class="address">${address}</span>`;
   }
 }
 
@@ -441,10 +461,40 @@ app.get("/", async (req, res) => {
               button:hover {
                   background: #0056b3;
               }
+
+              .ens-name {
+                font-weight: 600;
+                font-size: 1.1em;
+                color: #2c3e50;
+              }
+              
+              .address {
+                color: #6c757d;
+                font-size: 0.9em;
+              }
+
+              .proposal-header {
+                  display: flex;
+                  align-items: baseline;
+                  gap: 10px;
+              }
+              
+              .proposal-id {
+                  font-size: 0.8em;
+                  color: #6c757d;
+                  font-weight: normal;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-width: 200px;
+              }
           </style>
       </head>
       <body>
-          <h1>ENS DAO Votes - Proposal ${proposalId}</h1>
+          <div class="proposal-header">
+              <h1>ENS DAO Votes</h1>
+              <span class="proposal-id">Proposal: ${proposalId}</span>
+          </div>
           
           <div class="rpc-form">
               <form id="configForm">
@@ -472,13 +522,13 @@ app.get("/", async (req, res) => {
                   <div class="stats-section">
                       <h3>Vote Counts</h3>
                       <p>Total Votes: ${stats.totalVotes.toLocaleString()}</p>
-                      <p>For: ${stats.forCount.toLocaleString()} votes (${formatNumber(
+                      <p>For: ${stats.forCount.toLocaleString()} votes (${formatStatNumber(
       stats.forVotes
     )} weight)</p>
-                      <p>Against: ${stats.againstCount.toLocaleString()} votes (${formatNumber(
+                      <p>Against: ${stats.againstCount.toLocaleString()} votes (${formatStatNumber(
       stats.againstVotes
     )} weight)</p>
-                      <p>Abstain: ${stats.abstainCount.toLocaleString()} votes (${formatNumber(
+                      <p>Abstain: ${stats.abstainCount.toLocaleString()} votes (${formatStatNumber(
       stats.abstainVotes
     )} weight)</p>
                   </div>
@@ -494,13 +544,13 @@ app.get("/", async (req, res) => {
                               : "⏳ Quorum Not Reached"
                           }
                       </p>
-                      <p>Current Quorum Votes: ${formatNumber(
+                      <p>Current Quorum Votes: ${formatStatNumber(
                         stats.quorumVotes
                       )}</p>
-                      <p>Required Quorum: ${formatNumber(QUORUM_VOTES)}</p>
+                      <p>Required Quorum: ${formatStatNumber(QUORUM_VOTES)}</p>
                       ${
                         !stats.hasReachedQuorum
-                          ? `<p class="votes-needed">Needs ${formatNumber(
+                          ? `<p class="votes-needed">Needs ${formatStatNumber(
                               stats.votesNeededForQuorum
                             )} more votes</p>`
                           : ""
