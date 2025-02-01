@@ -33,6 +33,17 @@ const VOTE_CAST_EVENT =
 // Add a debug flag at the top with the other constants
 const DEBUG_MODE = false; // Back to using cache
 
+// Add quorum constant at the top with other constants
+const QUORUM_VOTES = 1_000_000; // 1 million votes required for quorum
+
+// Add this helper function near the top with other utility functions
+function formatNumber(number) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(number);
+}
+
 async function ensureCacheDir() {
   try {
     await fs.mkdir(config.CACHE_DIR, { recursive: true });
@@ -290,64 +301,145 @@ app.get("/", async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>ENS DAO Votes - Proposal ${proposalId}</title>
           <style>
-              table { border-collapse: collapse; width: 100%; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; }
-              tr:nth-child(even) { background-color: #f9f9f9; }
-              .rpc-status {
-                  display: inline-block;
-                  width: 12px;
-                  height: 12px;
-                  border-radius: 50%;
-                  margin-left: 8px;
+              body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+                  line-height: 1.5;
+                  color: #333;
+                  max-width: 1200px;
+                  margin: 0 auto;
+                  padding: 20px 40px;
               }
-              .rpc-status.active {
-                  background-color: #4CAF50;
+
+              h1, h2, h3 {
+                  color: #2c3e50;
               }
-              .rpc-status.inactive {
-                  background-color: #f44336;
-              }
-              .rpc-form {
+
+              .stats-grid {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 30px;
                   margin: 20px 0;
-                  padding: 15px;
-                  background-color: #f5f5f5;
-                  border-radius: 4px;
               }
-              .rpc-form input[type="text"] {
-                  width: 400px;
-                  padding: 8px;
-                  margin-right: 8px;
+
+              .stats-section {
+                  background: #f8f9fa;
+                  padding: 20px;
+                  border-radius: 8px;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
               }
-              .refresh-note {
-                  margin: 10px 0;
-                  color: #666;
-                  font-style: italic;
+
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin: 20px 0;
+                  background: white;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
               }
+
+              th, td {
+                  padding: 12px 16px;
+                  text-align: left;
+                  border-bottom: 1px solid #eee;
+              }
+
+              th {
+                  background: #f8f9fa;
+                  font-weight: 600;
+              }
+
               .view-buttons {
                   margin: 20px 0;
                   display: flex;
                   gap: 10px;
               }
+
               .view-button {
                   padding: 8px 16px;
                   border: 1px solid #ddd;
-                  border-radius: 4px;
-                  background: #f5f5f5;
+                  border-radius: 6px;
+                  background: #f8f9fa;
                   cursor: pointer;
                   text-decoration: none;
                   color: #333;
+                  transition: all 0.2s ease;
               }
+
+              .view-button:hover {
+                  background: #e9ecef;
+              }
+
               .view-button.active {
                   background: #007bff;
                   color: white;
                   border-color: #0056b3;
               }
+
+              .quorum-status {
+                  font-weight: 600;
+                  padding: 12px;
+                  border-radius: 6px;
+                  margin: 10px 0;
+              }
+
+              .quorum-status.reached {
+                  background: #d4edda;
+                  color: #155724;
+              }
+
+              .quorum-status.needed {
+                  background: #fff3cd;
+                  color: #856404;
+              }
+
+              .votes-needed {
+                  color: #856404;
+                  font-weight: 600;
+              }
+
+              .refresh-note {
+                  margin: 20px 0;
+                  color: #6c757d;
+                  font-style: italic;
+              }
+
               .sort-header {
                   cursor: pointer;
-                  text-decoration: underline;
+                  text-decoration: none;
+                  color: #2c3e50;
               }
+
               .sort-header:hover {
                   color: #007bff;
+              }
+
+              .rpc-form {
+                  background: #f8f9fa;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin: 20px 0;
+              }
+
+              input[type="text"] {
+                  padding: 8px 12px;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  font-size: 14px;
+                  width: 100%;
+                  max-width: 400px;
+              }
+
+              button {
+                  padding: 8px 16px;
+                  background: #007bff;
+                  color: white;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  transition: background 0.2s ease;
+              }
+
+              button:hover {
+                  background: #0056b3;
               }
           </style>
       </head>
@@ -376,16 +468,45 @@ app.get("/", async (req, res) => {
 
           <div class="stats">
               <h2>Voting Statistics</h2>
-              <p>Total Votes: ${stats.totalVotes}</p>
-              <p>For: ${stats.forCount} votes (${Number(stats.forVotes).toFixed(
-      2
+              <div class="stats-grid">
+                  <div class="stats-section">
+                      <h3>Vote Counts</h3>
+                      <p>Total Votes: ${stats.totalVotes.toLocaleString()}</p>
+                      <p>For: ${stats.forCount.toLocaleString()} votes (${formatNumber(
+      stats.forVotes
     )} weight)</p>
-              <p>Against: ${stats.againstCount} votes (${Number(
+                      <p>Against: ${stats.againstCount.toLocaleString()} votes (${formatNumber(
       stats.againstVotes
-    ).toFixed(2)} weight)</p>
-              <p>Abstain: ${stats.abstainCount} votes (${Number(
+    )} weight)</p>
+                      <p>Abstain: ${stats.abstainCount.toLocaleString()} votes (${formatNumber(
       stats.abstainVotes
-    ).toFixed(2)} weight)</p>
+    )} weight)</p>
+                  </div>
+                  
+                  <div class="stats-section">
+                      <h3>Quorum Status</h3>
+                      <p class="quorum-status ${
+                        stats.hasReachedQuorum ? "reached" : "needed"
+                      }">
+                          ${
+                            stats.hasReachedQuorum
+                              ? "✅ Quorum Reached"
+                              : "⏳ Quorum Not Reached"
+                          }
+                      </p>
+                      <p>Current Quorum Votes: ${formatNumber(
+                        stats.quorumVotes
+                      )}</p>
+                      <p>Required Quorum: ${formatNumber(QUORUM_VOTES)}</p>
+                      ${
+                        !stats.hasReachedQuorum
+                          ? `<p class="votes-needed">Needs ${formatNumber(
+                              stats.votesNeededForQuorum
+                            )} more votes</p>`
+                          : ""
+                      }
+                  </div>
+              </div>
           </div>
 
           <div class="view-buttons">
@@ -424,7 +545,7 @@ app.get("/", async (req, res) => {
                       <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
       rpcUrl
     )}&view=${viewFilter}&sort=weight&dir=${
-      sortBy === "weight" && sortDir === "asc" ? "desc" : "asc"
+      sortBy === "weight" ? (sortDir === "asc" ? "desc" : "asc") : ""
     }'">
                           Weight ${
                             sortBy === "weight"
@@ -437,7 +558,7 @@ app.get("/", async (req, res) => {
                       <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
       rpcUrl
     )}&view=${viewFilter}&sort=time&dir=${
-      sortBy === "time" && sortDir === "asc" ? "desc" : "asc"
+      sortBy === "time" ? (sortDir === "asc" ? "desc" : "asc") : ""
     }'">
                           Time ${
                             sortBy === "time"
@@ -457,7 +578,7 @@ app.get("/", async (req, res) => {
                       <tr>
                           <td>${vote.delegate}</td>
                           <td>${vote.vote}</td>
-                          <td>${Number(vote.weight).toFixed(2)}</td>
+                          <td>${formatNumber(vote.weight)}</td>
                           <td>${vote.timestamp}</td>
                           <td>${vote.reason}</td>
                       </tr>
@@ -525,9 +646,9 @@ async function main() {
 
 main().catch(console.error);
 
-// Add voting statistics calculation
+// Update the calculateVoteStats function
 function calculateVoteStats(votes) {
-  return votes.reduce(
+  const stats = votes.reduce(
     (acc, vote) => {
       const weight = parseFloat(vote.weight);
       acc.totalVotes++;
@@ -557,4 +678,11 @@ function calculateVoteStats(votes) {
       abstainCount: 0,
     }
   );
+
+  // Calculate quorum metrics
+  stats.quorumVotes = stats.forVotes + stats.abstainVotes;
+  stats.hasReachedQuorum = stats.quorumVotes >= QUORUM_VOTES;
+  stats.votesNeededForQuorum = Math.max(0, QUORUM_VOTES - stats.quorumVotes);
+
+  return stats;
 }
