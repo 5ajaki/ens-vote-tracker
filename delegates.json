@@ -1,0 +1,805 @@
+{
+  "lastUpdated": "2025-02-01",
+  "delegates": [
+    {
+      "address": "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
+      "votingPower": 3470358,
+      "votingPowerChange": -32943,
+      "delegations": 2,
+      "onChainVotes": 0,
+      "rank": 1
+    },
+    {
+      "address": "0x5BFCB4BE4d7B43437d5A0c57E908c048a4418390",
+      "votingPower": 193247,
+      "votingPowerChange": 28422,
+      "delegations": 287,
+      "onChainVotes": 26,
+      "rank": 2
+    },
+    {
+      "address": "0x89EdE5cBE53473A64d6C8DF14176a0d658dAAeDC",
+      "votingPower": 189309,
+      "votingPowerChange": 0,
+      "delegations": 3,
+      "onChainVotes": 14,
+      "rank": 3
+    },
+    {
+      "address": "0x81b287c0992B110ADEB5903Bf7E2d9350C80581a",
+      "votingPower": 165547,
+      "votingPowerChange": -2378,
+      "delegations": 738,
+      "onChainVotes": 6,
+      "rank": 4
+    },
+    {
+      "address": "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
+      "votingPower": 161850,
+      "votingPowerChange": 45699,
+      "delegations": 476,
+      "onChainVotes": 38,
+      "rank": 5
+    },
+    {
+      "address": "0x2B888954421b424C5D3D9Ce9bB67c9bD47537d12",
+      "votingPower": 128019,
+      "votingPowerChange": 1163,
+      "delegations": 427,
+      "onChainVotes": 37,
+      "rank": 6
+    },
+    {
+      "address": "0xe52C39327FF7576bAEc3DBFeF0787bd62dB6d726",
+      "votingPower": 115747,
+      "votingPowerChange": 0,
+      "delegations": 2,
+      "onChainVotes": 29,
+      "rank": 7
+    },
+    {
+      "address": "0x983110309620D911731Ac0932219af06091b6744",
+      "votingPower": 109275,
+      "votingPowerChange": -1031,
+      "delegations": 718,
+      "onChainVotes": 37,
+      "rank": 8
+    },
+    {
+      "address": "0x809FA673fe2ab515FaA168259cB14E2BeDeBF68e",
+      "votingPower": 100441,
+      "votingPowerChange": -2995,
+      "delegations": 481,
+      "onChainVotes": 36,
+      "rank": 9
+    },
+    {
+      "address": "0x1D5460F896521aD685Ea4c3F2c679Ec0b6806359",
+      "votingPower": 100393,
+      "votingPowerChange": 0,
+      "delegations": 4,
+      "onChainVotes": 37,
+      "rank": 10
+    },
+    {
+      "address": "0x7Ae94d7712b7EDB9BB2C0Ee6D71081a6D8710c0b",
+      "votingPower": 90979,
+      "votingPowerChange": -461,
+      "delegations": 81,
+      "onChainVotes": 17,
+      "rank": 11
+    },
+    {
+      "address": "0x7265a60acAeaf3A5E18E10BC1128e72F27B2e176",
+      "votingPower": 89142,
+      "votingPowerChange": 151,
+      "delegations": 256,
+      "onChainVotes": 8,
+      "rank": 12
+    },
+    {
+      "address": "0x839395e20bbB182fa440d08F850E6c7A8f6F0780",
+      "votingPower": 87554,
+      "votingPowerChange": -38920,
+      "delegations": 345,
+      "onChainVotes": 32,
+      "rank": 13
+    },
+    {
+      "address": "0xE3919F3f971C4589089DaA930aaFa81B8A27b406",
+      "votingPower": 80000,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 24,
+      "rank": 14
+    },
+    {
+      "address": "0x4e88F436422075C1417357bF957764c127B2CC93",
+      "votingPower": 78447,
+      "votingPowerChange": -437,
+      "delegations": 280,
+      "onChainVotes": 1,
+      "rank": 15
+    },
+    {
+      "address": "0xf6B6F07862A02C85628B3A9688beae07fEA9C863",
+      "votingPower": 72111,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 2,
+      "rank": 16
+    },
+    {
+      "address": "0x399e0Ae23663F27181Ebb4e66Ec504b3AAB25541",
+      "votingPower": 72092,
+      "votingPowerChange": -1485,
+      "delegations": 350,
+      "onChainVotes": 22,
+      "rank": 17
+    },
+    {
+      "address": "0x7a3d05c70581bD345fe117c06e45f9669205384f",
+      "votingPower": 70011,
+      "votingPowerChange": -1087,
+      "delegations": 554,
+      "onChainVotes": 12,
+      "rank": 18
+    },
+    {
+      "address": "0x54BeCc7560a7Be76d72ED76a1f5fee6C5a2A7Ab6",
+      "votingPower": 67269,
+      "votingPowerChange": -1841,
+      "delegations": 438,
+      "onChainVotes": 29,
+      "rank": 19
+    },
+    {
+      "address": "0xc95C558dAA63b1A79331B2AB4a2a7af375384d3B",
+      "votingPower": 56652,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 20
+    },
+    {
+      "address": "0xB94B57A92aB7c6406519A48C0dd1e26FD6D45D88",
+      "votingPower": 56573,
+      "votingPowerChange": 0,
+      "delegations": 2,
+      "onChainVotes": 0,
+      "rank": 21
+    },
+    {
+      "address": "0xE5501BC2B0Df6D0D7daAFC18D2ef127D9e612963",
+      "votingPower": 54191,
+      "votingPowerChange": -3296,
+      "delegations": 422,
+      "onChainVotes": 3,
+      "rank": 22
+    },
+    {
+      "address": "0x48dbB9B7B562ACf3c38E53deAfF4686e24c3D85D",
+      "votingPower": 54079,
+      "votingPowerChange": -48,
+      "delegations": 68,
+      "onChainVotes": 14,
+      "rank": 23
+    },
+    {
+      "address": "0x534631Bcf33BDb069fB20A93d2fdb9e4D4dD42CF",
+      "votingPower": 51095,
+      "votingPowerChange": 1,
+      "delegations": 32,
+      "onChainVotes": 39,
+      "rank": 24
+    },
+    {
+      "address": "0x13BF6057bd5d5C37095372FCaCff7b93B5B75F0D",
+      "votingPower": 50347,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 25
+    },
+    {
+      "address": "0x1eeA6382f133c6Fc4d40C28d19F4B628e918a0D2",
+      "votingPower": 46587,
+      "votingPowerChange": 290,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 26
+    },
+    {
+      "address": "0xd1324aDA7e026211D0CacD90CAe5777E340dE948",
+      "votingPower": 46536,
+      "votingPowerChange": 0,
+      "delegations": 10,
+      "onChainVotes": 10,
+      "rank": 27
+    },
+    {
+      "address": "0x2CB86D919332D0369C66A2d5982419266F5e490f",
+      "votingPower": 46371,
+      "votingPowerChange": 0,
+      "delegations": 2,
+      "onChainVotes": 0,
+      "rank": 28
+    },
+    {
+      "address": "0x2D7d6Ec6198ADFD5850D00BD601958F6E316b05E",
+      "votingPower": 46352,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 15,
+      "rank": 29
+    },
+    {
+      "address": "0x190473B3071946df65306989972706A4c006A561",
+      "votingPower": 41320,
+      "votingPowerChange": -2361,
+      "delegations": 339,
+      "onChainVotes": 3,
+      "rank": 30
+    },
+    {
+      "address": "0xBdB41BfF7E828E2DC2d15EB67257455db818F1DC",
+      "votingPower": 38451,
+      "votingPowerChange": -1249,
+      "delegations": 307,
+      "onChainVotes": 18,
+      "rank": 31
+    },
+    {
+      "address": "0xBcE35d5A3e89995730B3C979a01319D06E41776f",
+      "votingPower": 34326,
+      "votingPowerChange": 0,
+      "delegations": 2,
+      "onChainVotes": 17,
+      "rank": 32
+    },
+    {
+      "address": "0xed11e5eA95a5A3440fbAadc4CC404C56D0a5bb04",
+      "votingPower": 33995,
+      "votingPowerChange": -947,
+      "delegations": 201,
+      "onChainVotes": 28,
+      "rank": 33
+    },
+    {
+      "address": "0xb7847E247871f468F221E2113640A5B9e98e19f2",
+      "votingPower": 33653,
+      "votingPowerChange": 166,
+      "delegations": 248,
+      "onChainVotes": 0,
+      "rank": 34
+    },
+    {
+      "address": "0x8C28Cf33d9Fd3D0293f963b1cd27e3FF422B425c",
+      "votingPower": 30000,
+      "votingPowerChange": -4000,
+      "delegations": 1,
+      "onChainVotes": 1,
+      "rank": 35
+    },
+    {
+      "address": "0x911CDD758029C5063DC964d1941Fdb613B440051",
+      "votingPower": 25000,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 1,
+      "rank": 36
+    },
+    {
+      "address": "0xdd00Cc906B93419814443Bb913949d503B3DF3c4",
+      "votingPower": 24997,
+      "votingPowerChange": -1525,
+      "delegations": 197,
+      "onChainVotes": 4,
+      "rank": 37
+    },
+    {
+      "address": "0x1F3D3A7A9c548bE39539b39D7400302753E20591",
+      "votingPower": 24348,
+      "votingPowerChange": 141,
+      "delegations": 6,
+      "onChainVotes": 10,
+      "rank": 38
+    },
+    {
+      "address": "0x8b3347FD0B8C3a619d1f1FDc90CAF4F335c03742",
+      "votingPower": 23936,
+      "votingPowerChange": -1189,
+      "delegations": 170,
+      "onChainVotes": 18,
+      "rank": 39
+    },
+    {
+      "address": "0x9cea5Ea0AA477d1e66B5E056Ab5A30E017AbA0F6",
+      "votingPower": 20010,
+      "votingPowerChange": 20010,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 40
+    },
+    {
+      "address": "0x225f137127d9067788314bc7fcc1f36746a3c3B5",
+      "votingPower": 17500,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 1,
+      "rank": 41
+    },
+    {
+      "address": "0x815FD2bA302De5FA849469b1511e34E9D8fbB51D",
+      "votingPower": 17482,
+      "votingPowerChange": -59,
+      "delegations": 86,
+      "onChainVotes": 1,
+      "rank": 42
+    },
+    {
+      "address": "0x0c2eC205cF0F50995dd84F0655b54848844Bda74",
+      "votingPower": 16963,
+      "votingPowerChange": -198,
+      "delegations": 129,
+      "onChainVotes": 0,
+      "rank": 43
+    },
+    {
+      "address": "0xB0CA2E19356F763721110b2E0B318883DF844cBC",
+      "votingPower": 16200,
+      "votingPowerChange": -484,
+      "delegations": 137,
+      "onChainVotes": 0,
+      "rank": 44
+    },
+    {
+      "address": "0xd5D171a9AA125AF13216C3213B5A9Fc793FcCF2c",
+      "votingPower": 15941,
+      "votingPowerChange": -100,
+      "delegations": 38,
+      "onChainVotes": 35,
+      "rank": 45
+    },
+    {
+      "address": "0x6e0d9c6dd8a08509bB625CAa35dc61a991406F62",
+      "votingPower": 13519,
+      "votingPowerChange": -876,
+      "delegations": 94,
+      "onChainVotes": 9,
+      "rank": 46
+    },
+    {
+      "address": "0x000000DCF1190aF44f7149B85299F18Ce7221024",
+      "votingPower": 12627,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 3,
+      "rank": 47
+    },
+    {
+      "address": "0xf07A2439296e07Bc4320AF924E655a01fb69D89C",
+      "votingPower": 11482,
+      "votingPowerChange": -73,
+      "delegations": 78,
+      "onChainVotes": 1,
+      "rank": 48
+    },
+    {
+      "address": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+      "votingPower": 11043,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 49
+    },
+    {
+      "address": "0x8F73bE66CA8c79382f72139be03746343Bf5Faa0",
+      "votingPower": 10385,
+      "votingPowerChange": -223,
+      "delegations": 54,
+      "onChainVotes": 7,
+      "rank": 50
+    },
+    {
+      "address": "0x035eBd096AFa6b98372494C7f08f3402324117D3",
+      "votingPower": 10148,
+      "votingPowerChange": -55,
+      "delegations": 5,
+      "onChainVotes": 26,
+      "rank": 51
+    },
+    {
+      "address": "0x1d921dff757610FbDB0073479e12c0a07d382677",
+      "votingPower": 10000,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 4,
+      "rank": 53
+    },
+    {
+      "address": "0x8787FC2De4De95c53e5E3a4e5459247D9773ea52",
+      "votingPower": 10000,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 5,
+      "rank": 52
+    },
+    {
+      "address": "0xE7e84204B7e180454e5C40d0e04D346214a83f85",
+      "votingPower": 9315,
+      "votingPowerChange": 0,
+      "delegations": 62,
+      "onChainVotes": 0,
+      "rank": 54
+    },
+    {
+      "address": "0x4AA5D5059aEB7d2796Ae887081917160c0Cadf66",
+      "votingPower": 9303,
+      "votingPowerChange": -700,
+      "delegations": 3,
+      "onChainVotes": 9,
+      "rank": 55
+    },
+    {
+      "address": "0xFC63B3aCd10456b6356E7524860d0b07AcF71fD8",
+      "votingPower": 9250,
+      "votingPowerChange": -35,
+      "delegations": 80,
+      "onChainVotes": 1,
+      "rank": 56
+    },
+    {
+      "address": "0x1E7EC443262fab908c390ca44B7ED53345a29918",
+      "votingPower": 8494,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 57
+    },
+    {
+      "address": "0x3bDcd88A9639F85818Ed5A35E2ABf6292D9b0377",
+      "votingPower": 8142,
+      "votingPowerChange": -812,
+      "delegations": 30,
+      "onChainVotes": 0,
+      "rank": 58
+    },
+    {
+      "address": "0x8d07D225a769b7Af3A923481E1FdF49180e6A265",
+      "votingPower": 7886,
+      "votingPowerChange": -285,
+      "delegations": 48,
+      "onChainVotes": 18,
+      "rank": 59
+    },
+    {
+      "address": "0xA7860E99e3ce0752D1ac53b974E309fFf80277C6",
+      "votingPower": 7880,
+      "votingPowerChange": 3361,
+      "delegations": 9,
+      "onChainVotes": 29,
+      "rank": 60
+    },
+    {
+      "address": "0x0457d3ef89435F23d781F97495D1E3e6C93813Db",
+      "votingPower": 7249,
+      "votingPowerChange": -392,
+      "delegations": 56,
+      "onChainVotes": 4,
+      "rank": 61
+    },
+    {
+      "address": "0x4dC96AAd2Daa3f84066F3A00EC41Fd1e88c8865A",
+      "votingPower": 7053,
+      "votingPowerChange": 0,
+      "delegations": 3,
+      "onChainVotes": 11,
+      "rank": 62
+    },
+    {
+      "address": "0x5D509F653d7e4914AF9da434bF25c53Cd122763D",
+      "votingPower": 7007,
+      "votingPowerChange": 0,
+      "delegations": 52,
+      "onChainVotes": 0,
+      "rank": 63
+    },
+    {
+      "address": "0x8ab1760889F26cBbf33A75FD2cF1696BFccDc9e6",
+      "votingPower": 6514,
+      "votingPowerChange": 0,
+      "delegations": 29,
+      "onChainVotes": 4,
+      "rank": 64
+    },
+    {
+      "address": "0x3B3525F60eeea4a1eF554df5425912c2a532875D",
+      "votingPower": 6125,
+      "votingPowerChange": -4,
+      "delegations": 48,
+      "onChainVotes": 12,
+      "rank": 65
+    },
+    {
+      "address": "0x29a82E07B96c405aC99a8023F767D2971546DE70",
+      "votingPower": 6095,
+      "votingPowerChange": -16,
+      "delegations": 10,
+      "onChainVotes": 34,
+      "rank": 66
+    },
+    {
+      "address": "0xb7f4E738bb0B85aD1ECef26a2A733dc899dA500E",
+      "votingPower": 5427,
+      "votingPowerChange": 0,
+      "delegations": 32,
+      "onChainVotes": 2,
+      "rank": 67
+    },
+    {
+      "address": "0x6C7A16A3582e8c8d974D9Eb29B84ce18Ed005cb3",
+      "votingPower": 5186,
+      "votingPowerChange": -91,
+      "delegations": 70,
+      "onChainVotes": 0,
+      "rank": 68
+    },
+    {
+      "address": "0x3335cc8BDa40fB5a5F8Db1D0011dEc98728d81E1",
+      "votingPower": 5174,
+      "votingPowerChange": -464,
+      "delegations": 52,
+      "onChainVotes": 34,
+      "rank": 69
+    },
+    {
+      "address": "0x6140F00e4Ff3936702E68744f2b5978885464cbB",
+      "votingPower": 5020,
+      "votingPowerChange": 0,
+      "delegations": 31,
+      "onChainVotes": 0,
+      "rank": 70
+    },
+    {
+      "address": "0x029183bd9A47CDD7f5df8Fb64382022C4b681b63",
+      "votingPower": 4888,
+      "votingPowerChange": -458,
+      "delegations": 11,
+      "onChainVotes": 27,
+      "rank": 71
+    },
+    {
+      "address": "0x7B3431DB5a984C7a7a710175F6119a385070E9ec",
+      "votingPower": 4880,
+      "votingPowerChange": -207,
+      "delegations": 35,
+      "onChainVotes": 1,
+      "rank": 72
+    },
+    {
+      "address": "0x6405A46E53680Eae9cC68228ec3a459c3CEDD972",
+      "votingPower": 4756,
+      "votingPowerChange": 0,
+      "delegations": 31,
+      "onChainVotes": 0,
+      "rank": 73
+    },
+    {
+      "address": "0xe11Da9560b51f8918295edC5ab9c0a90E9ADa20B",
+      "votingPower": 4308,
+      "votingPowerChange": 0,
+      "delegations": 29,
+      "onChainVotes": 9,
+      "rank": 74
+    },
+    {
+      "address": "0x2486d6eA7dDBdb872DfE2383ac16Cfb73DB28733",
+      "votingPower": 4292,
+      "votingPowerChange": -146,
+      "delegations": 34,
+      "onChainVotes": 1,
+      "rank": 75
+    },
+    {
+      "address": "0x4628D77ba8fCc7a7F2B6bd4A0363061a06E7a20F",
+      "votingPower": 4280,
+      "votingPowerChange": 0,
+      "delegations": 32,
+      "onChainVotes": 0,
+      "rank": 76
+    },
+    {
+      "address": "0x68ade9fA92C5AC2E798556377e11bd9829bE4553",
+      "votingPower": 4195,
+      "votingPowerChange": 0,
+      "delegations": 26,
+      "onChainVotes": 0,
+      "rank": 77
+    },
+    {
+      "address": "0x866F5DA24591B2401F04C1F3Dd0cBc799Bb52fdf",
+      "votingPower": 4128,
+      "votingPowerChange": -50,
+      "delegations": 10,
+      "onChainVotes": 5,
+      "rank": 78
+    },
+    {
+      "address": "0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6",
+      "votingPower": 4000,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 79
+    },
+    {
+      "address": "0x68F9D801C96aC6ccf562f3600Cef77c4504449b6",
+      "votingPower": 3947,
+      "votingPowerChange": -129,
+      "delegations": 27,
+      "onChainVotes": 2,
+      "rank": 80
+    },
+    {
+      "address": "0x48A63097E1Ac123b1f5A8bbfFafA4afa8192FaB0",
+      "votingPower": 3750,
+      "votingPowerChange": -1457,
+      "delegations": 19,
+      "onChainVotes": 11,
+      "rank": 81
+    },
+    {
+      "address": "0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63",
+      "votingPower": 3685,
+      "votingPowerChange": -120,
+      "delegations": 20,
+      "onChainVotes": 7,
+      "rank": 82
+    },
+    {
+      "address": "0xB2Ebc9b3a788aFB1E942eD65B59E9E49A1eE500D",
+      "votingPower": 3558,
+      "votingPowerChange": -73,
+      "delegations": 26,
+      "onChainVotes": 0,
+      "rank": 83
+    },
+    {
+      "address": "0x66b1De0f14a0ce971F7f248415063D44CAF19398",
+      "votingPower": 3406,
+      "votingPowerChange": -110,
+      "delegations": 17,
+      "onChainVotes": 0,
+      "rank": 84
+    },
+    {
+      "address": "0xf3427890604BC8BE673517B9Dde1bab548aE3329",
+      "votingPower": 3366,
+      "votingPowerChange": 0,
+      "delegations": 3,
+      "onChainVotes": 24,
+      "rank": 85
+    },
+    {
+      "address": "0xc0DEAF6bD3F0c6574a6a625EF2F22f62A5150EAB",
+      "votingPower": 3241,
+      "votingPowerChange": -50,
+      "delegations": 29,
+      "onChainVotes": 1,
+      "rank": 86
+    },
+    {
+      "address": "0x60dbF50076206F60bCc2Edf9295f5734561B8d77",
+      "votingPower": 3239,
+      "votingPowerChange": 0,
+      "delegations": 2,
+      "onChainVotes": 8,
+      "rank": 87
+    },
+    {
+      "address": "0x394495a3800D1504b5686D398836BaEFEBd0C5B7",
+      "votingPower": 2899,
+      "votingPowerChange": -26,
+      "delegations": 18,
+      "onChainVotes": 0,
+      "rank": 88
+    },
+    {
+      "address": "0xeE7601251B3fe157aa52dDB9EA06b7Ae401Da978",
+      "votingPower": 2825,
+      "votingPowerChange": 0,
+      "delegations": 17,
+      "onChainVotes": 1,
+      "rank": 89
+    },
+    {
+      "address": "0xE3610421509dDCeB43f6afC8a38814D8FFFA19b6",
+      "votingPower": 2629,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 0,
+      "rank": 90
+    },
+    {
+      "address": "0xcde3725B25D6d9bC78CF0941cC15Fd9710c764b9",
+      "votingPower": 2439,
+      "votingPowerChange": -361,
+      "delegations": 16,
+      "onChainVotes": 0,
+      "rank": 91
+    },
+    {
+      "address": "0x69eF61AFc3AA356e1ac97347119d75cBdAbEF534",
+      "votingPower": 2364,
+      "votingPowerChange": -83,
+      "delegations": 11,
+      "onChainVotes": 0,
+      "rank": 92
+    },
+    {
+      "address": "0x5C04E7808455ee0e22c2773328C151d0DD79dC62",
+      "votingPower": 2306,
+      "votingPowerChange": 0,
+      "delegations": 1,
+      "onChainVotes": 5,
+      "rank": 93
+    },
+    {
+      "address": "0xD18e205b41eEe3D208D3B10445DB95Ff02ba4acA",
+      "votingPower": 2286,
+      "votingPowerChange": 0,
+      "delegations": 18,
+      "onChainVotes": 0,
+      "rank": 94
+    },
+    {
+      "address": "0x6091A224ec0e8BaE16125603d179D9fCE7aaD641",
+      "votingPower": 2267,
+      "votingPowerChange": 0,
+      "delegations": 10,
+      "onChainVotes": 3,
+      "rank": 95
+    },
+    {
+      "address": "0xa960BcC07FdD90c94cBB40De105aD909f7012A9c",
+      "votingPower": 2214,
+      "votingPowerChange": 0,
+      "delegations": 13,
+      "onChainVotes": 0,
+      "rank": 96
+    },
+    {
+      "address": "0x934B510D4C9103E6a87AEf13b816fb080286D649",
+      "votingPower": 2195,
+      "votingPowerChange": -5,
+      "delegations": 17,
+      "onChainVotes": 1,
+      "rank": 97
+    },
+    {
+      "address": "0x3B27c32b88d2c415a28FDA4c9B245Aa8e6dD8B0C",
+      "votingPower": 2168,
+      "votingPowerChange": -2,
+      "delegations": 13,
+      "onChainVotes": 0,
+      "rank": 98
+    },
+    {
+      "address": "0x7Eb84E42059F0D44269C50f4D3A280Fd307a6824",
+      "votingPower": 2114,
+      "votingPowerChange": 0,
+      "delegations": 7,
+      "onChainVotes": 0,
+      "rank": 99
+    },
+    {
+      "address": "0x782C93e1C530a283Ef738A58b5671A8fC2D8153f",
+      "votingPower": 2062,
+      "votingPowerChange": -322,
+      "delegations": 17,
+      "onChainVotes": 2,
+      "rank": 100
+    }
+  ]
+}
