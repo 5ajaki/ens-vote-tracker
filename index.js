@@ -36,6 +36,136 @@ const DEBUG_MODE = false; // Back to using cache
 // Add quorum constant at the top with other constants
 const QUORUM_VOTES = 1_000_000; // 1 million votes required for quorum
 
+// Add after other constants
+const DELEGATES_FILE = "delegates.json";
+
+// Add ENS token contract details near the top with other constants
+const ENS_TOKEN_ADDRESS = "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72";
+const ENS_TOKEN_ABI = [
+  "function balanceOf(address account) view returns (uint256)",
+  "function delegates(address account) view returns (address)",
+  "function getPastVotes(address account, uint256 blockNumber) view returns (uint256)",
+];
+
+// Update the loadDelegates function to handle the JSON structure
+async function loadDelegates() {
+  try {
+    const data = await fs.readFile(DELEGATES_FILE, "utf8");
+    const parsed = JSON.parse(data);
+    return parsed.delegates || []; // Return the delegates array from the JSON structure
+  } catch (error) {
+    console.error("Error loading delegates:", error);
+    return [];
+  }
+}
+
+// Add this new function to get delegate snapshot
+async function getDelegateSnapshot(proposalId, snapshotBlock, provider) {
+  try {
+    // Check for existing snapshot - this data is immutable once created
+    const snapshotFile = path.join(
+      config.CACHE_DIR,
+      `snapshot-${proposalId}.json`
+    );
+    try {
+      const cached = await fs.readFile(snapshotFile, "utf8");
+      console.log(`Using cached immutable snapshot for proposal ${proposalId}`);
+      return JSON.parse(cached);
+    } catch (err) {
+      if (err.code !== "ENOENT") throw err;
+      // Only continue if file doesn't exist
+    }
+
+    // If we get here, we need to create the snapshot for the first time
+    console.log(
+      `Creating new immutable snapshot for proposal ${proposalId} at block ${snapshotBlock}...`
+    );
+    const delegates = await loadDelegates();
+
+    // Create ENS token contract instance
+    const ensToken = new ethers.Contract(
+      ENS_TOKEN_ADDRESS,
+      ENS_TOKEN_ABI,
+      provider
+    );
+
+    // Get voting power for each delegate at snapshot block
+    const snapshot = await Promise.all(
+      delegates.map(async (delegate) => {
+        try {
+          // Get actual voting power at snapshot block
+          const votingPower = await ensToken.getPastVotes(
+            delegate.address,
+            snapshotBlock
+          );
+          const votingPowerFormatted = ethers.formatUnits(votingPower, 18);
+
+          return {
+            address: delegate.address,
+            expectedVotingPower: delegate.votingPower,
+            actualVotingPower: parseFloat(votingPowerFormatted),
+            delegations: delegate.delegations,
+            onChainVotes: delegate.onChainVotes,
+            rank: delegate.rank,
+            hasVotingPowerChanged:
+              Math.abs(
+                delegate.votingPower - parseFloat(votingPowerFormatted)
+              ) > 0.1,
+          };
+        } catch (error) {
+          console.warn(
+            `Failed to get votes for ${delegate.address}:`,
+            error.message
+          );
+          return null;
+        }
+      })
+    );
+
+    // Filter out nulls and sort by actual voting power
+    const validSnapshot = snapshot
+      .filter((d) => d !== null)
+      .sort((a, b) => b.actualVotingPower - a.actualVotingPower);
+
+    // Add rankings and voting power changes
+    const snapshotWithRanks = validSnapshot.map((delegate, index) => ({
+      ...delegate,
+      currentRank: index + 1,
+      rankChange: delegate.rank - (index + 1),
+      votingPowerChange:
+        delegate.actualVotingPower - delegate.expectedVotingPower,
+    }));
+
+    // Log significant changes
+    snapshotWithRanks
+      .filter(
+        (d) =>
+          Math.abs(d.votingPowerChange) > 1000 || Math.abs(d.rankChange) > 5
+      )
+      .forEach((d) => {
+        console.log(`Significant change for ${d.address}:
+          Voting Power: ${d.expectedVotingPower} -> ${d.actualVotingPower} (${
+          d.votingPowerChange > 0 ? "+" : ""
+        }${d.votingPowerChange.toFixed(2)})
+          Rank: ${d.rank} -> ${d.currentRank} (${d.rankChange > 0 ? "+" : ""}${
+          d.rankChange
+        })`);
+      });
+
+    // Cache the snapshot (this will never need to be updated)
+    await fs.writeFile(
+      snapshotFile,
+      JSON.stringify(snapshotWithRanks, null, 2)
+    );
+    console.log(`Immutable snapshot cached for proposal ${proposalId}`);
+
+    return snapshotWithRanks;
+  } catch (error) {
+    console.error("Error creating delegate snapshot:", error);
+    throw error;
+  }
+}
+
 // Update the number formatting function
 function formatNumber(number) {
   const num = parseFloat(number);
@@ -115,6 +245,7 @@ async function resolveENSName(address, provider) {
   }
 }
 
+// Update the getVotingData function to use the new snapshot
 async function getVotingData(proposalId) {
   try {
     // Check cache first
@@ -132,12 +263,22 @@ async function getVotingData(proposalId) {
       provider
     );
 
-    // Get snapshot block - Add this back
+    // Get snapshot block
     const snapshotBlock = await governorContract.proposalSnapshot(proposalId);
     if (snapshotBlock === 0n) {
       throw new Error(`Proposal ${proposalId} does not exist`);
     }
     console.log(`Snapshot block: ${snapshotBlock}`);
+
+    // Get delegate snapshot with actual voting power at snapshot block
+    const delegatesAtSnapshot = await getDelegateSnapshot(
+      proposalId,
+      snapshotBlock,
+      provider
+    );
+    console.log(
+      `Found ${delegatesAtSnapshot.length} delegates with voting power`
+    );
 
     const currentBlock = await provider.getBlockNumber();
     let allEvents = [];
@@ -211,12 +352,26 @@ async function getVotingData(proposalId) {
       })
     );
 
+    // When returning results, include the delegate snapshot
+    const result = {
+      votes: votes,
+      delegateSnapshot: delegatesAtSnapshot,
+      snapshotBlock: Number(snapshotBlock),
+      snapshotStats: {
+        totalDelegates: delegatesAtSnapshot.length,
+        significantChanges: delegatesAtSnapshot.filter(
+          (d) => d.hasVotingPowerChanged
+        ).length,
+        topDelegatesByPower: delegatesAtSnapshot.slice(0, 10),
+      },
+    };
+
     // Cache the results
     if (!DEBUG_MODE) {
-      await cacheData(proposalId, votes);
+      await cacheData(proposalId, result);
     }
 
-    return votes;
+    return result;
   } catch (error) {
     console.error(`Error in getVotingData:`, error);
     throw error;
@@ -290,17 +445,29 @@ app.get("/", async (req, res) => {
     const votes = await getVotingData(proposalId);
     const stats = calculateVoteStats(votes);
 
-    // Apply view filter
-    const filteredVotes = votes.filter((vote) => {
-      if (viewFilter === "all") return true;
-      if (viewFilter === "for" && vote.vote === "For") return true;
-      if (viewFilter === "against" && vote.vote === "Against") return true;
-      if (viewFilter === "abstain" && vote.vote === "Abstain") return true;
-      return false;
-    });
+    let filteredVotes = votes.votes;
+    let tableData = [];
+
+    if (viewFilter === "notvoted") {
+      tableData = await getNotVotedDelegates(
+        votes.delegateSnapshot,
+        votes.votes
+      );
+    } else if (viewFilter === "for") {
+      filteredVotes = votes.votes.filter((v) => v.vote === "For");
+      tableData = filteredVotes;
+    } else if (viewFilter === "against") {
+      filteredVotes = votes.votes.filter((v) => v.vote === "Against");
+      tableData = filteredVotes;
+    } else if (viewFilter === "abstain") {
+      filteredVotes = votes.votes.filter((v) => v.vote === "Abstain");
+      tableData = filteredVotes;
+    } else {
+      tableData = votes.votes;
+    }
 
     // Apply sorting
-    const sortedVotes = [...filteredVotes].sort((a, b) => {
+    const sortedVotes = [...tableData].sort((a, b) => {
       if (sortBy === "weight") {
         const weightA = parseFloat(a.weight);
         const weightB = parseFloat(b.weight);
@@ -312,6 +479,66 @@ app.get("/", async (req, res) => {
         return sortDir === "desc" ? timeB - timeA : timeA - timeB;
       }
     });
+
+    // Update the table HTML generation to use the correct template based on view
+    const tableHTML =
+      viewFilter === "notvoted"
+        ? await generateNotVotedTable(sortedVotes)
+        : `
+  <table class="votes-table">
+    <thead>
+      <tr>
+        <th>Voter</th>
+        <th>Vote</th>
+        <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
+            rpcUrl
+          )}&view=${viewFilter}&sort=weight&dir=${
+            sortBy === "weight" ? (sortDir === "asc" ? "desc" : "asc") : ""
+          }'">
+          Weight ${sortBy === "weight" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+        </th>
+        <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
+            rpcUrl
+          )}&view=${viewFilter}&sort=time&dir=${
+            sortBy === "time" ? (sortDir === "asc" ? "desc" : "asc") : ""
+          }'">
+          Time ${sortBy === "time" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+        </th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${sortedVotes
+        .map((vote) => {
+          const address = vote.delegate.match(/0x[a-fA-F0-9]{40}/)[0];
+          return `
+          <tr>
+            <td>
+              ${vote.delegate.replace(
+                address,
+                `<a href="https://etherscan.io/address/${address}" target="_blank" class="address-link">${address.substring(
+                  0,
+                  6
+                )}...${address.substring(38)}</a>`
+              )}
+            </td>
+            <td>${vote.vote}</td>
+            <td class="voting-power">${formatNumber(vote.weight)}</td>
+            <td>${vote.timestamp}</td>
+            <td style="text-align: center">
+              ${
+                vote.reason
+                  ? `<span title="${vote.reason}" class="reason-icon">ℹ️</span>`
+                  : ""
+              }
+            </td>
+          </tr>
+        `;
+        })
+        .join("")}
+    </tbody>
+  </table>
+`;
 
     const html = `
       <!DOCTYPE html>
@@ -488,6 +715,73 @@ app.get("/", async (req, res) => {
                   text-overflow: ellipsis;
                   max-width: 200px;
               }
+
+              .votes-table {
+                  width: 100%;
+                  border-collapse: separate;
+                  border-spacing: 0;
+                  margin: 20px 0;
+                  background: white;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                  border-radius: 8px;
+              }
+
+              .votes-table th {
+                  background: #f8f9fa;
+                  padding: 16px;
+                  text-align: left;
+                  font-weight: 600;
+                  color: #2c3e50;
+                  border-bottom: 2px solid #dee2e6;
+              }
+
+              .votes-table td {
+                  padding: 12px 16px;
+                  border-bottom: 1px solid #eee;
+                  vertical-align: middle;
+              }
+
+              .votes-table tr:last-child td {
+                  border-bottom: none;
+              }
+
+              .votes-table tr:hover {
+                  background-color: #f8f9fa;
+              }
+
+              .ens-name {
+                  font-weight: 600;
+                  font-size: 1.1em;
+                  color: #2c3e50;
+                  display: block;
+              }
+
+              .address-link {
+                  color: #6c757d;
+                  font-size: 0.9em;
+                  text-decoration: none;
+              }
+
+              .address-link:hover {
+                  color: #007bff;
+              }
+
+              .voting-power {
+                  font-weight: 600;
+                  color: #2c3e50;
+              }
+
+              .reason-icon {
+                  display: inline-block;
+                  width: 20px;
+                  height: 20px;
+                  line-height: 20px;
+                  text-align: center;
+                  border-radius: 50%;
+                  background: #f8f9fa;
+                  color: #6c757d;
+                  cursor: help;
+              }
           </style>
       </head>
       <body>
@@ -584,59 +878,15 @@ app.get("/", async (req, res) => {
                  class="view-button ${
                    viewFilter === "abstain" ? "active" : ""
                  }">Abstain</a>
-              <a href="#" class="view-button disabled" onclick="alert('Coming soon!')">Not Yet Voted</a>
+              <a href="?proposal=${proposalId}&rpc=${encodeURIComponent(
+      rpcUrl
+    )}&view=notvoted&sort=${sortBy}&dir=${sortDir}" 
+                 class="view-button ${
+                   viewFilter === "notvoted" ? "active" : ""
+                 }">Not Yet Voted</a>
           </div>
 
-          <table>
-              <thead>
-                  <tr>
-                      <th>Voter</th>
-                      <th>Vote</th>
-                      <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
-      rpcUrl
-    )}&view=${viewFilter}&sort=weight&dir=${
-      sortBy === "weight" ? (sortDir === "asc" ? "desc" : "asc") : ""
-    }'">
-                          Weight ${
-                            sortBy === "weight"
-                              ? sortDir === "asc"
-                                ? "↑"
-                                : "↓"
-                              : ""
-                          }
-                      </th>
-                      <th class="sort-header" onclick="window.location.href='?proposal=${proposalId}&rpc=${encodeURIComponent(
-      rpcUrl
-    )}&view=${viewFilter}&sort=time&dir=${
-      sortBy === "time" ? (sortDir === "asc" ? "desc" : "asc") : ""
-    }'">
-                          Time ${
-                            sortBy === "time"
-                              ? sortDir === "asc"
-                                ? "↑"
-                                : "↓"
-                              : ""
-                          }
-                      </th>
-                      <th>Reason</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  ${sortedVotes
-                    .map(
-                      (vote) => `
-                      <tr>
-                          <td>${vote.delegate}</td>
-                          <td>${vote.vote}</td>
-                          <td>${formatNumber(vote.weight)}</td>
-                          <td>${vote.timestamp}</td>
-                          <td>${vote.reason}</td>
-                      </tr>
-                  `
-                    )
-                    .join("")}
-              </tbody>
-          </table>
+          ${tableHTML}
 
           <div class="refresh-note">
               Last updated: ${new Date().toLocaleString()}
@@ -697,8 +947,8 @@ async function main() {
 main().catch(console.error);
 
 // Update the calculateVoteStats function
-function calculateVoteStats(votes) {
-  const stats = votes.reduce(
+function calculateVoteStats(data) {
+  const stats = data.votes.reduce(
     (acc, vote) => {
       const weight = parseFloat(vote.weight);
       acc.totalVotes++;
@@ -735,4 +985,105 @@ function calculateVoteStats(votes) {
   stats.votesNeededForQuorum = Math.max(0, QUORUM_VOTES - stats.quorumVotes);
 
   return stats;
+}
+
+async function getNotVotedDelegates(delegateSnapshot, votes) {
+  // Create a Set of addresses that have voted for quick lookup
+  const votedAddresses = new Set(
+    votes
+      .map((vote) => {
+        const match = vote.delegate.match(/0x[a-fA-F0-9]{40}/);
+        return match ? match[0].toLowerCase() : null;
+      })
+      .filter((addr) => addr !== null)
+  );
+
+  // Filter out specific address and those who have voted
+  return delegateSnapshot
+    .filter((delegate) => {
+      const hasNotVoted = !votedAddresses.has(delegate.address.toLowerCase());
+      const hasSignificantPower = delegate.actualVotingPower >= 1000;
+      const isNotExcluded =
+        delegate.address.toLowerCase() !==
+        "0x552df471a4c7fea11ea8d7a7b0acc6989b902a95";
+      return hasNotVoted && hasSignificantPower && isNotExcluded;
+    })
+    .sort((a, b) => b.actualVotingPower - a.actualVotingPower);
+}
+
+async function generateNotVotedTable(delegates) {
+  const provider = new ethers.JsonRpcProvider(config.RPC_URL);
+
+  const delegatesWithENS = await Promise.all(
+    delegates.map(async (delegate) => ({
+      ...delegate,
+      resolvedName: await resolveENSName(delegate.address, provider),
+    }))
+  );
+
+  return `
+    <table class="votes-table">
+      <thead>
+        <tr>
+          <th>Delegate</th>
+          <th>Voting Power</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${delegatesWithENS
+          .map(
+            (delegate) => `
+          <tr>
+            <td>
+              <span class="ens-name">${delegate.resolvedName}</span>
+              <a href="https://etherscan.io/address/${delegate.address}" 
+                 target="_blank" 
+                 class="address-link">
+                ${delegate.address.substring(
+                  0,
+                  6
+                )}...${delegate.address.substring(38)}
+              </a>
+            </td>
+            <td class="voting-power">${formatNumber(
+              delegate.actualVotingPower
+            )}</td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function generateVotesTable(votes) {
+  return `
+    <table class="votes-table">
+      <thead>
+        <tr>
+          <th>Delegate</th>
+          <th>Vote</th>
+          <th>Weight</th>
+          <th>Time</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${votes
+          .map(
+            (vote) => `
+          <tr>
+            <td>${vote.delegate}</td>
+            <td>${vote.vote}</td>
+            <td>${formatNumber(vote.weight)}</td>
+            <td>${vote.timestamp}</td>
+            <td>${vote.reason}</td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
 }
