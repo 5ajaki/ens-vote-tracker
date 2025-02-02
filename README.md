@@ -29,6 +29,10 @@ node index.js
 
 3. Visit `http://localhost:3000` in your browser and start exploring!
 
+![image](https://github.com/user-attachments/assets/1c18b4cc-82b3-4fc4-bb43-9fa788f15a09)
+
+
+
 ## ⚙️ Configuration
 
 Configure through environment variables or the UI:
