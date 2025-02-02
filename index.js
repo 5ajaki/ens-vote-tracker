@@ -522,13 +522,21 @@ app.get("/", async (req, res) => {
                 )}...${address.substring(38)}</a>`
               )}
             </td>
-            <td>${vote.vote}</td>
+            <td>
+              <span class="${
+                vote.vote === "For"
+                  ? "vote-for"
+                  : vote.vote === "Against"
+                  ? "vote-against"
+                  : ""
+              }">${vote.vote}</span>
+            </td>
             <td class="voting-power">${formatNumber(vote.weight)}</td>
             <td>${vote.timestamp}</td>
-            <td style="text-align: center">
+            <td class="reason-cell">
               ${
                 vote.reason
-                  ? `<span title="${vote.reason}" class="reason-icon">ℹ️</span>`
+                  ? `<button onclick="showReason(this)" class="reason-button" data-reason="${vote.reason}">Show</button>`
                   : ""
               }
             </td>
@@ -666,13 +674,48 @@ app.get("/", async (req, res) => {
                   margin: 20px 0;
               }
 
-              input[type="text"] {
+              .form-row {
+                  margin-bottom: 12px;
+              }
+              
+              .form-row label {
+                  display: block;
+              }
+              
+              .label-text {
+                  display: inline-block;
+                  width: 100px;
+                  text-align: right;
+                  padding-right: 10px;
+              }
+              
+              .input-wrapper {
+                  display: inline-block;
+                  position: relative;
+              }
+              
+              .form-row input[type="text"] {
                   padding: 8px 12px;
                   border: 1px solid #ddd;
                   border-radius: 4px;
                   font-size: 14px;
-                  width: 100%;
-                  max-width: 400px;
+                  width: 400px;
+              }
+              
+              .rpc-status {
+                  position: absolute;
+                  right: -20px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  font-size: 16px;
+              }
+              
+              .rpc-status.active {
+                  color: #28a745;
+              }
+              
+              .rpc-status.inactive {
+                  color: #dc3545;
               }
 
               button {
@@ -771,16 +814,70 @@ app.get("/", async (req, res) => {
                   color: #2c3e50;
               }
 
-              .reason-icon {
+              .reason-text {
                   display: inline-block;
-                  width: 20px;
-                  height: 20px;
-                  line-height: 20px;
+                  max-width: 100px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+
+              .vote-for {
+                  background: rgba(40, 167, 69, 0.3);
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  color: #0a4d1c;
+              }
+              
+              .vote-against {
+                  background: rgba(220, 53, 69, 0.3);
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  color: #721c24;
+              }
+              
+              .reason-cell {
+                  max-width: 30px;
                   text-align: center;
-                  border-radius: 50%;
-                  background: #f8f9fa;
+              }
+              
+              .reason-button {
+                  background: rgba(108, 117, 125, 0.15);
+                  border: none;
+                  cursor: pointer;
                   color: #6c757d;
-                  cursor: help;
+                  padding: 4px 12px;
+                  border-radius: 12px;
+                  font-size: 12px;
+              }
+              
+              .reason-button:hover {
+                  background: rgba(108, 117, 125, 0.25);
+              }
+              
+              .reason-modal {
+                  display: none;
+                  position: fixed;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                  z-index: 1000;
+                  max-width: 500px;
+                  width: 90%;
+              }
+              
+              .modal-backdrop {
+                  display: none;
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  background: rgba(0,0,0,0.5);
+                  z-index: 999;
               }
           </style>
       </head>
@@ -792,16 +889,29 @@ app.get("/", async (req, res) => {
           
           <div class="rpc-form">
               <form id="configForm">
-                  <label>RPC URL: 
-                      <input type="text" name="rpc" value="${rpcUrl}" size="50">
-                      <span class="rpc-status ${
-                        rpcStatus ? "active" : "inactive"
-                      }" 
-                            title="${
-                              rpcStatus ? "RPC Active" : "RPC Inactive"
-                            }"></span>
-                  </label>
-                  <button type="submit">Update RPC</button>
+                  <div class="form-row">
+                    <label>
+                      <span class="label-text">RPC URL:</span>
+                      <div class="input-wrapper">
+                        <input type="text" name="rpc" value="${rpcUrl}" size="50">
+                        <span class="rpc-status ${
+                          rpcStatus ? "active" : "inactive"
+                        }" 
+                              title="${
+                                rpcStatus ? "RPC Active" : "RPC Inactive"
+                              }">●</span>
+                      </div>
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      <span class="label-text">Proposal ID:</span>
+                      <div class="input-wrapper">
+                        <input type="text" name="proposal" value="${proposalId}" size="50">
+                      </div>
+                    </label>
+                  </div>
+                  <button type="submit">Update Configuration</button>
               </form>
           </div>
 
@@ -892,6 +1002,42 @@ app.get("/", async (req, res) => {
               Last updated: ${new Date().toLocaleString()}
               (Refresh page to update data)
           </div>
+
+          <!-- Add modal elements at the end of the body -->
+          <div class="modal-backdrop" id="modalBackdrop" onclick="hideReason()"></div>
+          <div class="reason-modal" id="reasonModal">
+            <h3>Vote Reason</h3>
+            <p id="reasonText"></p>
+          </div>
+
+          <!-- Add JavaScript for modal handling -->
+          <script>
+          function showReason(button) {
+            const reason = button.getAttribute('data-reason');
+            document.getElementById('reasonText').textContent = reason;
+            document.getElementById('modalBackdrop').style.display = 'block';
+            document.getElementById('reasonModal').style.display = 'block';
+          }
+
+          function hideReason() {
+            document.getElementById('modalBackdrop').style.display = 'none';
+            document.getElementById('reasonModal').style.display = 'none';
+          }
+
+          // Close modal on escape key
+          document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+              hideReason();
+            }
+          });
+
+          document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const rpc = this.elements.rpc.value;
+            const proposal = this.elements.proposal.value;
+            window.location.href = '/?proposal=' + proposal + '&rpc=' + encodeURIComponent(rpc);
+          });
+          </script>
       </body>
       </html>
     `;
